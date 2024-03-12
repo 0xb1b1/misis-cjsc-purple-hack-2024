@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "misis-cjsc-lct-yakutia-2023-backend"
+packages = [{include = "cjsc_backend", from="src"}]
+version = "0.0.1"
+description = ""
+authors = ["0xb1b1 <hello@axelreitenbach.online>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pymongo = "^4.6.1"
+fastapi = {extras = ["all"], version = "^0.104.1"}
+pydantic = "^2.5.2"
+uvicorn = "^0.24.0.post1"
+loguru = "^0.7.2"
+pyhumps = "^3.8.0"
+fastapi-jwt = "^0.2.0"
+pydantic-mongo = "^2.0.3"
+sentry-sdk = {extras = ["fastapi", "loguru", "pymongo"], version = "^1.38.0"}
+requests = "^2.31.0"
+pysocks = "^1.7.1"
+yandexfreetranslate = {git = "https://github.com/0xb1b1/yandexfreetranslate.git", rev = "fix/lang-code-len-verification"}
+beautifulsoup4 = "^4.12.2"
+psycopg2 = "^2.9.9"
+
+[tool.poetry.scripts]
+start = "cjsc_backend.main:run"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+ipykernel = "^6.27.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
