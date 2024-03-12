@@ -7,7 +7,9 @@ import sentry_sdk
 from sentry_sdk.integrations.loguru import LoguruIntegration
 from cjsc_backend import config
 from cjsc_backend.setup import cors
+from cjsc_backend.routers.http.debug import router as debug_router
 from cjsc_backend.routers.http.root import router as root_router
+from cjsc_backend.routers.http.auth import router as auth_router
 from cjsc_backend.routers.ws.messages import router as msg_router
 
 
@@ -28,8 +30,10 @@ def run() -> None:
     )
     cors.set_cors_policy(app)
 
+    app.include_router(debug_router)
     app.include_router(root_router)
     app.include_router(msg_router)
+    app.include_router(auth_router)
 
     logger.info(f"Starting webserver at \
 `{config.WEBSERVER_HOST}:{config.WEBSERVER_PORT}...`")

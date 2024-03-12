@@ -10,6 +10,13 @@ from cjsc_backend.setup import webserver_port
 
 is_run_fatal = False
 
+# if file ./dev.flag exists, load_dotenv()
+if os.path.isfile("./dev.flag"):
+    logger.warning("Loading environment variables from .env file... (`dev.flag` detected)")
+    from dotenv import load_dotenv
+    load_dotenv()
+    logger.info("Loaded environment variables from .env file.")
+
 WEBSERVER_HOST: str = os.getenv(
     "CJSC_BACKEND_WEBSERVER_HOST",
     "0.0.0.0"
@@ -48,10 +55,10 @@ DB_NAME = os.getenv("CJSC_BACKEND_PGSQL_NAME")
 DB_USER = os.getenv("CJSC_BACKEND_PGSQL_USER")
 DB_PASS = os.getenv("CJSC_BACKEND_PGSQL_PASS")
 if not DB_NAME or not DB_USER or not DB_PASS or not DB_HOST or not DB_PORT:
-    logger.error("Some or all PostgreSQL connection parameters not provided")
+    logger.critical("Some or all PostgreSQL connection parameters not provided")
     is_run_fatal = True
 
 ########
 if is_run_fatal:
-    logger.error("Setup failed. Exiting.")
+    logger.critical("Setup failed. Exiting.")
     sys.exit(1)

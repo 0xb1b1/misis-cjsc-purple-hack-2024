@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 from pydantic import BaseModel, EmailStr
+from datetime import datetime
 
 
 class UserBaseSchema(BaseModel):
+    id: int
     email: EmailStr
     password_hash: str
+    avatar_url: str | None = None
+    role: str = "user"
     first_name: str
     last_name: str | None = None
-
-
-class UserSignupSchema(UserBaseSchema):
-    ...
+    created_at: datetime | None = None
 
 
 class UserResponseSchema(UserBaseSchema):

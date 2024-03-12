@@ -22,6 +22,8 @@ pysocks = "^1.7.1"
 yandexfreetranslate = {git = "https://github.com/0xb1b1/yandexfreetranslate.git", rev = "fix/lang-code-len-verification"}
 beautifulsoup4 = "^4.12.2"
 psycopg2 = "^2.9.9"
+python-dotenv = "^1.0.1"
+bcrypt = "^4.1.2"
 
 [tool.poetry.scripts]
 start = "cjsc_backend.main:run"
