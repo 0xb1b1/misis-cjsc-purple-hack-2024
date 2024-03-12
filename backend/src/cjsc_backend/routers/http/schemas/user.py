@@ -14,6 +14,14 @@ class UserBaseSchema(BaseModel):
     created_at: datetime | None = None
 
 
+class UserSignupSchema(BaseModel):
+    email: EmailStr
+    password: str
+    first_name: str
+    last_name: str | None = None
+    created_at: datetime = datetime.now()
+
+
 class UserResponseSchema(UserBaseSchema):
     login_successful: bool | None
 
@@ -24,5 +32,6 @@ class UserLoginSchema(BaseModel):
 
 
 class UserInfoSchema(BaseModel):
+    id: int
     email: EmailStr
     role: str

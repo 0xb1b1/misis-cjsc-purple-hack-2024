@@ -8,6 +8,7 @@ name: "misis-cjsc-purple-hack-2024"
 services:
   postgres:
     image: postgres:15
+    restart: no
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}

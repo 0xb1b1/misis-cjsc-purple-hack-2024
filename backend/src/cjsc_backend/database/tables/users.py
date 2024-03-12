@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
+from datetime import datetime
+import bcrypt
 from loguru import logger
 from psycopg2 import DatabaseError
-from cjsc_backend.routers.http.schemas.user import UserLoginSchema, UserBaseSchema
+from cjsc_backend.routers.http.schemas.user import UserLoginSchema, UserBaseSchema, UserSignupSchema
 
 
 def get(conn, uid: int | None = None, email: str | None = None) -> str:
@@ -15,7 +17,7 @@ def get(conn, uid: int | None = None, email: str | None = None) -> str:
         return _get_by_email(conn, email)
 
 
-def create(conn, user: UserBaseSchema) -> str:
+def create(conn, user: UserSignupSchema) -> str:
     logger.debug(f"Creating user: {user.email}")
     with conn.cursor() as curs:
         try:
@@ -24,18 +26,21 @@ def create(conn, user: UserBaseSchema) -> str:
 first_name, last_name, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                 (
                     user.email,
-                    user.password_hash,
-                    user.avatar_url,
-                    user.role,
+                    bcrypt.hashpw(
+                        user.password.encode('utf-8'),
+                        bcrypt.gensalt()
+                    ).decode('utf-8'),
+                    None,
+                    "user",
                     user.first_name,
                     user.last_name,
-                    user.created_at,
+                    datetime.now(),
                 ),
             )
             conn.commit()
         except DatabaseError as e:
             logger.error(f"Failed to create user, rolling back: {e}")
-            curs.rollback()
+            conn.rollback()
             raise e
 
 
@@ -47,7 +52,7 @@ first_name, last_name, created_at FROM users WHERE email = %s", (email,))
             user = curs.fetchone()
         except DatabaseError as e:
             logger.error(f"Failed to get user by email, rolling back: {e}")
-            curs.rollback()
+            conn.rollback()
             raise e
 
     return UserBaseSchema(
@@ -55,9 +60,11 @@ first_name, last_name, created_at FROM users WHERE email = %s", (email,))
         email=user[1],
         password_hash=user[2],
         avatar_url=user[3],
-        role=user[3],
-        first_name=user[4],
-        last_name=user[5],
+        role=user[4],
+        first_name=user[5],
+        last_name=user[6],
+        # 2024-03-12T23:02:18.777335
+        created_at=user[7],
     )
 
 

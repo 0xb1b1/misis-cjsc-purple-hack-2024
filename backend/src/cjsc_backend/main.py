@@ -10,7 +10,8 @@ from cjsc_backend.setup import cors
 from cjsc_backend.routers.http.debug import router as debug_router
 from cjsc_backend.routers.http.root import router as root_router
 from cjsc_backend.routers.http.auth import router as auth_router
-from cjsc_backend.routers.ws.messages import router as msg_router
+from cjsc_backend.routers.ws.messages import router as ws_msg_router
+from cjsc_backend.routers.http.messages import router as msg_router
 
 
 def run() -> None:
@@ -32,6 +33,7 @@ def run() -> None:
 
     app.include_router(debug_router)
     app.include_router(root_router)
+    app.include_router(ws_msg_router)
     app.include_router(msg_router)
     app.include_router(auth_router)
 
