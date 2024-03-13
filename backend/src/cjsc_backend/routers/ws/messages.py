@@ -96,6 +96,7 @@ async def chat_listen(sid, user_id):
                     "chat_message",
                     data={
                         "message": {
+                            "id": msg.id,
                             "from": msg.from_user_id,
                             "to": msg.to_user_id,
                             "content": msg.content,
@@ -106,6 +107,75 @@ async def chat_listen(sid, user_id):
                     namespace="/webapp",
                     timeout=5
                 )
+        except DatabaseError as e:
+            logger.error(f"Failed to get chat messages (database): {e}")
+            # disconnect client on exception (and send error message)
+            await sio.emit(
+                "chat_message",
+                data={
+                    "error": "Failed to get chat messages",
+                    "info: ": str(e)
+                },
+                room=sid,
+                namespace="/webapp"
+            )
+            await sio.disconnect(sid, namespace="/webapp")
+            return
+        # IMPORTANT: Do not spam TODO: check the sleep duration performance
+        await asyncio.sleep(0.5)
+
+
+@sio.on("chats_listen", namespace="/webapp")
+async def chats_listen(sid):
+    # Same as chat_listen, but for all chats of the user
+    # the user_id is taken from the database, not a room
+    logger.debug(f"User is listening for new chats (sid: {sid})")
+
+    my_user = await sio.get_session(sid, namespace="/webapp")
+    my_user_id = my_user["user"]["subject"]["id"]
+
+    last_msg_id = None
+    # Send all messages
+    heartbeat_counter = 1
+    while True:
+        try:
+            if heartbeat_counter % 10 == 0:
+                logger.debug(f"Calling heartbeat for {sid}")
+                await sio.call(
+                    "heartbeat",
+                    data="heartbeat",
+                    to=sid,
+                    namespace="/webapp",
+                    timeout=5
+                )
+                heartbeat_counter = 1
+            heartbeat_counter += 1
+        except TimeoutError:
+            logger.error(f"Failed to send heartbeat to {sid}; client probably disconnected")
+            await sio.disconnect(sid, namespace="/webapp")
+            return
+
+        # Send messages
+        try:
+            msgs = messages.get_all_chat_messages(db, my_user_id, last_msg_id)
+            for msg in msgs:
+                await sio.call(
+                    "chat_message",
+                    data={
+                        "message": {
+                            "id": msg.id,
+                            "from": msg.from_user_id,
+                            "to": msg.to_user_id,
+                            "content": msg.content,
+                            "created_at": datetime.strftime(msg.created_at, "%Y-%m-%d %H:%M:%S")
+                        }
+                    },
+                    to=sid,
+                    namespace="/webapp",
+                    timeout=5
+                )
+            last_msg_id = msgs[-1].id + 1 if len(msgs) > 0 else last_msg_id
+
         except DatabaseError as e:
             logger.error(f"Failed to get chat messages (database): {e}")
             # disconnect client on exception (and send error message)

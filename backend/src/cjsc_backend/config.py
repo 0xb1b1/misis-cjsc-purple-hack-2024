@@ -58,6 +58,14 @@ if not DB_NAME or not DB_USER or not DB_PASS or not DB_HOST or not DB_PORT:
     logger.critical("Some or all PostgreSQL connection parameters not provided")
     is_run_fatal = True
 
+# Chat management
+CHAT_EXPIRY_MINUTES = int(
+    os.getenv(
+        "CJSC_BACKEND_CHAT_EXPIRY_MINUTES",
+        "20",
+    )
+)
+
 ########
 if is_run_fatal:
     logger.critical("Setup failed. Exiting.")

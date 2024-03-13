@@ -86,6 +86,51 @@ def get_chat_messages(conn, peer_1_id: int, peer_2_id: int, from_msg_id: int | N
     return messages
 
 
+def get_all_chat_messages(conn, user_id: int, from_msg_id: int | None = None) -> list[Message]:
+    """Get all chat messages for a user.
+
+    Args:
+        conn (_type_): PostgreSQL connection object.
+        user_id (int): User ID to get messages for.
+        from_msg_id (int | None, optional): Retrieve all messages starting from this Message ID. Defaults to None.
+
+    Returns:
+        list[Message]: List of messages for the user.
+    """
+    messages = []
+    with conn.cursor() as curs:
+        try:
+            if not from_msg_id:
+                curs.execute(
+                    "SELECT id, from_user_id, to_user_id, is_read, content, created_at FROM messages WHERE from_user_id = %s OR to_user_id = %s",
+                    (user_id, user_id)
+                )
+                raw_messages = curs.fetchall()
+            else:
+                curs.execute(
+                    "SELECT id, from_user_id, to_user_id, is_read, content, created_at FROM messages WHERE (from_user_id = %s OR to_user_id = %s) AND id >= %s",
+                    (user_id, user_id, from_msg_id)
+                )
+                raw_messages = curs.fetchall()
+        except DatabaseError as e:
+            logger.error(f"Failed to get chat messages: {e}")
+            conn.rollback()
+            raise e
+
+    messages = []
+    for msg in raw_messages:
+        messages.append(Message(
+            id=msg[0],
+            from_user_id=msg[1],
+            to_user_id=msg[2],
+            is_read=msg[3],
+            content=msg[4],
+            created_at=msg[5]
+        ))
+
+    return messages
+
+
 def create_chat_message(conn, message: Message):
     """_summary_
 
