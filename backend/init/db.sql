@@ -64,6 +64,10 @@ VALUES ('user2@test.com', '$2a$12$KJadZpT8WuUX/ht2QBrSAuqeQkJNve38IpFukwRwg53uNF
 INSERT INTO USERS (email, password_hash, role, first_name, last_name)
 VALUES ('user3@test.com', '$2a$12$EJlUeZPlQ/dZQ2GSFHuLAuPyeY96UeRiOWGkqMPQtHba0c/3gyIbO', 'user', 'Имя-3', 'Фамилия-3');
 
+-- operator4
+INSERT INTO USERS (email, password_hash, role, first_name, last_name)
+VALUES ('operator4@test.com' '$2a$12$x5rNeDoVa1CuNFC3eVmK8.ZKvjWgmhORPjsMzmThCQGz72svV0/Ge', 'operator', 'Оля', 'Операторова');
+
 ---- Mock messages
 INSERT INTO messages (from_user_id, to_user_id, content, created_at)
 VALUES (1, 0, 'Привет, оператор!', '2024-02-11 22:00:00');
