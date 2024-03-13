@@ -52,7 +52,9 @@ async def auth(sid, token):
         room=sid,
         namespace="/webapp"
     )
+    logger.debug(f"Saving session for {sid}")
     await sio.save_session(sid, {"user": user}, namespace="/webapp")
+    logger.debug(f"Saved session for {sid}: {await sio.get_session(sid, namespace='/webapp')}")
 
 
 @sio.on(event="chats_list", namespace="/webapp")
