@@ -266,7 +266,7 @@ async def chats_listen(sid):
                     },
                     to=sid,
                     namespace="/webapp",
-                    timeout=5
+                    # timeout=5
                 )
             last_msg_id = msgs[-1].id + 1 if len(msgs) > 0 else last_msg_id
 
