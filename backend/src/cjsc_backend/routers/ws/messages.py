@@ -228,25 +228,7 @@ async def chats_listen(sid):
 
     last_msg_id = None
     # Send all messages
-    heartbeat_counter = 1
     while True:
-        try:
-            if heartbeat_counter % 10 == 0:
-                logger.debug(f"Calling heartbeat for {sid}")
-                await sio.call(
-                    "heartbeat",
-                    data="heartbeat",
-                    to=sid,
-                    namespace="/webapp",
-                    timeout=5
-                )
-                heartbeat_counter = 1
-            heartbeat_counter += 1
-        except TimeoutError:
-            logger.error(f"Failed to send heartbeat to {sid}; client probably disconnected")
-            await sio.disconnect(sid, namespace="/webapp")
-            return
-
         # Send messages
         try:
             logger.debug(f"Getting chat messages for {my_user_id} from {last_msg_id}")
