@@ -2,9 +2,26 @@
 import psycopg2
 from psycopg2 import OperationalError
 from loguru import logger
+from cjsc_backend import config
 
 
-def create_connection(
+def create_connection_with_config():
+    """
+    Create a connection to the PostgreSQL database using the configuration
+    settings.
+
+    :return: connection: The connection object or None.
+    """
+    return _create_connection(
+        db_name=config.DB_NAME,
+        db_user=config.DB_USER,
+        db_pass=config.DB_PASS,
+        db_host=config.DB_HOST,
+        db_port=config.DB_PORT,
+    )
+
+
+def _create_connection(
     db_name: str = None, db_user: str = None,
     db_pass: str = None, db_host: str = None,
     db_port: int | str = None

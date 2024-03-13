@@ -1,0 +1,17 @@
+---
+name: "misis-cjsc-purple-hack-2024"
+
+#! WARNING: This Compose file is intented for _testing_ purposes during development only.
+#! It is not to be used to test dev/prd deployments locally or in the production environment.
+#! Please consult the documentation for more information on how to deploy this application.
+
+services:
+  postgres:
+    image: postgres:15
+    restart: no
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+    ports:
+      - "25432:5432"

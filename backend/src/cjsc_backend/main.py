@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import socketio
 from fastapi import FastAPI
 from loguru import logger
 import uvicorn
@@ -7,8 +8,11 @@ import sentry_sdk
 from sentry_sdk.integrations.loguru import LoguruIntegration
 from cjsc_backend import config
 from cjsc_backend.setup import cors
+from cjsc_backend.routers.http.debug import router as debug_router
 from cjsc_backend.routers.http.root import router as root_router
-from cjsc_backend.routers.ws.messages import router as msg_router
+from cjsc_backend.routers.http.auth import router as auth_router
+from cjsc_backend.routers.ws.messages import sio as ws_msg_sio
+from cjsc_backend.routers.http.messages import router as msg_router
 
 
 def run() -> None:
@@ -28,13 +32,17 @@ def run() -> None:
     )
     cors.set_cors_policy(app)
 
+    app.include_router(debug_router)
     app.include_router(root_router)
     app.include_router(msg_router)
+    app.include_router(auth_router)
+
+    combined_asgi_app = socketio.ASGIApp(ws_msg_sio, app)
 
     logger.info(f"Starting webserver at \
 `{config.WEBSERVER_HOST}:{config.WEBSERVER_PORT}...`")
     uvicorn.run(
-        app, host=config.WEBSERVER_HOST,
+        combined_asgi_app, host=config.WEBSERVER_HOST,
         port=config.WEBSERVER_PORT
     )
 
