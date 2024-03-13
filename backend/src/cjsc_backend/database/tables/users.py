@@ -54,6 +54,9 @@ first_name, last_name, created_at FROM users WHERE email = %s", (email,))
             conn.rollback()
             raise e
 
+    if user is None:
+        raise ValueError(f"User with email {email} not found")
+
     return UserBaseSchema(
         id=user[0],
         email=user[1],
@@ -77,6 +80,9 @@ first_name, last_name, created_at FROM users WHERE id = %s", (uid,))
             logger.error(f"Failed to get user by uid, rolling back: {e}")
             conn.rollback()
             raise e
+
+    if user is None:
+        raise ValueError(f"User with uid {uid} not found")
 
     return UserBaseSchema(
         id=user[0],

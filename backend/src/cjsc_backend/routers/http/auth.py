@@ -81,6 +81,11 @@ async def login(credentials: UserLoginSchema):
             f"User with email {credentials.email} does not exist \
 or other error: {e}"
         )
+    except ValueError as e:
+        logger.debug(
+            f"User with email {credentials.email} does not exist \
+or other error: {e}"
+        )
     logger.debug(f"Got user from DB: {user}")
     logger.critical(f"User password hash: {str(user.password_hash.encode('utf-8').decode())}")
 
