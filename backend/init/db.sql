@@ -28,3 +28,10 @@ CREATE INDEX IF NOT EXISTS messages_from_idx ON messages(from_user_id);
 CREATE INDEX IF NOT EXISTS messages_to_idx ON messages(to_user_id);
 CREATE INDEX IF NOT EXISTS messages_from_to_idx ON messages(from_user_id, to_user_id);
 CREATE INDEX IF NOT EXISTS messages_from_to_ts_idx ON messages(from_user_id, to_user_id, created_at);
+
+CREATE TABLE IF NOT EXISTS chat_sessions (
+  id SERIAL PRIMARY KEY,
+  user_1_id INTEGER NOT NULL REFERENCES users(id),
+  user_2_id INTEGER NOT NULL REFERENCES users(id),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)

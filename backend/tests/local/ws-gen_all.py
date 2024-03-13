@@ -15,6 +15,11 @@ async def run():
         event = await sio.receive()
         print(event)
 
+        # Get chats list
+        await sio.emit("chats_list")
+        chat_list = await sio.receive()
+        print(chat_list)
+
         # Listen for chat messages
         send_msg_counter = 0
         await sio.emit("chats_listen")

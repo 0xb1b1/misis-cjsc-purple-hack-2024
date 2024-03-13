@@ -16,20 +16,27 @@ from cjsc_backend.routers.http.schemas.message import Message
 
 def get_user_chats(conn, user_id: int) -> list[int]:
     # List all chats (opposite users' ids) of user_id without repeating
-    chats = []
+    chats_raw = []
     with conn.cursor() as curs:
         try:
             curs.execute(
                 "SELECT DISTINCT ON (from_user_id, to_user_id) from_user_id, to_user_id FROM messages WHERE from_user_id = %s OR to_user_id = %s",
                 (user_id, user_id)
             )
-            chats = curs.fetchall()
+            chats_raw = curs.fetchall()
         except DatabaseError as e:
             logger.error(f"Failed to get user chats: {e}")
             conn.rollback()
             raise e
 
-    return list(chats)
+    chats: list[int] = []
+    for chat in chats_raw:
+        if chat[0] == user_id:
+            chats.append(chat[1])
+        else:
+            chats.append(chat[0])
+
+    return chats
 
 
 def get_chat_messages(conn, peer_1_id: int, peer_2_id: int, from_msg_id: int | None = None) -> list[Message]:

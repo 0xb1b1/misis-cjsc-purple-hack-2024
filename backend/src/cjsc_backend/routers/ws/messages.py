@@ -55,6 +55,37 @@ async def auth(sid, token):
     await sio.save_session(sid, {"user": user}, namespace="/webapp")
 
 
+@sio.on(event="chats_list", namespace="/webapp")
+async def chats_list(sid):
+    logger.debug(f"Getting chats for {sid}")
+    my_user = await sio.get_session(sid, namespace="/webapp")
+    my_user_id = my_user["user"]["subject"]["id"]
+
+    try:
+        chats = messages.get_user_chats(db, my_user_id)
+    except DatabaseError as e:
+        logger.error(f"Failed to get user chats: {e}")
+        await sio.emit(
+            "chats_list",
+            data={
+                "error": "Failed to get user chats",
+                "info: ": str(e)
+            },
+            room=sid,
+            namespace="/webapp"
+        )
+        return
+
+    await sio.emit(
+        "chats_list",
+        data={
+            "chats": chats
+        },
+        room=sid,
+        namespace="/webapp"
+    )
+
+
 @sio.on(event="chat_listen", namespace="/webapp")
 async def chat_listen(sid, user_id):
     # the user_id is taken from the database, not a room

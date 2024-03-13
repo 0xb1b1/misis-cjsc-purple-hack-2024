@@ -22,7 +22,7 @@ router = APIRouter(
 )
 
 
-@router.post(
+@router.get(
     "/chats",
 )
 async def messages_get_chats(
