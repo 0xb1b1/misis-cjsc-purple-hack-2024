@@ -66,7 +66,7 @@ VALUES ('user3@test.com', '$2a$12$EJlUeZPlQ/dZQ2GSFHuLAuPyeY96UeRiOWGkqMPQtHba0c
 
 -- operator4
 INSERT INTO USERS (email, password_hash, role, first_name, last_name)
-VALUES ('operator4@test.com' '$2a$12$x5rNeDoVa1CuNFC3eVmK8.ZKvjWgmhORPjsMzmThCQGz72svV0/Ge', 'operator', 'Оля', 'Операторова');
+VALUES ('operator4@test.com', '$2a$12$f4xoPph.oGZDh0AV5PnZF.s7TjBR3w3XtaklhsulvdsIq2aFXWMHu', 'operator', 'Оля', 'Операторова');
 
 ---- Mock messages
 INSERT INTO messages (from_user_id, to_user_id, content, created_at)
