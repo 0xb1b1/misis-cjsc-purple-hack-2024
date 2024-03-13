@@ -1,0 +1,11 @@
+---
+name: "ml"
+
+services:
+  redis:
+    image: redis:alpine
+    restart: on-failure
+    ports:
+      - target: 6379
+        published: "6379"
+        mode: ingress
