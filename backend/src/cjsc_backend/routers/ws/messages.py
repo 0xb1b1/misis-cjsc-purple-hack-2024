@@ -253,7 +253,7 @@ async def chats_listen(sid):
             msgs = messages.get_all_chat_messages(db, my_user_id, last_msg_id)
             for msg in msgs:
                 logger.debug(f"Sending message to {sid}: {msg.content} from {msg.from_user_id} to {msg.to_user_id} at {msg.created_at}")
-                await sio.call(
+                await sio.emit(  # TODO: change back after testing
                     "chat_message",
                     data={
                         "message": {
