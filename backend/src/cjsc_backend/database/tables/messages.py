@@ -113,13 +113,13 @@ def get_all_chat_messages(conn, user_id: int, from_msg_id: int | None = None) ->
         try:
             if not from_msg_id:
                 curs.execute(
-                    "SELECT id, from_user_id, to_user_id, is_read, content, created_at FROM messages WHERE from_user_id = %s OR to_user_id = %s",
+                    "SELECT id, from_user_id, to_user_id, is_read, content, created_at FROM messages WHERE (from_user_id = %s OR to_user_id = %s) ORDER BY id ASC",
                     (user_id, user_id)
                 )
                 raw_messages = curs.fetchall()
             else:
                 curs.execute(
-                    "SELECT id, from_user_id, to_user_id, is_read, content, created_at FROM messages WHERE (from_user_id = %s OR to_user_id = %s) AND id >= %s",
+                    "SELECT id, from_user_id, to_user_id, is_read, content, created_at FROM messages WHERE (from_user_id = %s OR to_user_id = %s) AND id >= %s ORDER BY id ASC",
                     (user_id, user_id, from_msg_id)
                 )
                 raw_messages = curs.fetchall()
