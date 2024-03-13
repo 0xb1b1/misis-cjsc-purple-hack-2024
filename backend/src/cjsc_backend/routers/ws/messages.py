@@ -57,6 +57,22 @@ async def auth(sid, token):
 
 @sio.on(event="chats_list", namespace="/webapp")
 async def chats_list(sid):
+    """Sends all chats of the user to the client (recipients' user IDs).
+    Returns data in the following format:
+    ```
+    [
+        'chats_list',
+        {
+            'chats': [
+                0, 2, 4
+            ]
+        }
+    ]
+    ```
+
+    Args:
+        sid (_type_): Socket ID. Autopopulated on request by SocketIO Client.
+    """
     logger.debug(f"Getting chats for {sid}")
     my_user = await sio.get_session(sid, namespace="/webapp")
     my_user_id = my_user["user"]["subject"]["id"]
@@ -88,6 +104,27 @@ async def chats_list(sid):
 
 @sio.on(event="chat_listen", namespace="/webapp")
 async def chat_listen(sid, user_id):
+    """Sends all updates from the chat with user_id to the client, including the initiator's messages.
+    Messages from this event handler are in the following format:
+    ```
+        [
+            'chat_message',
+            {
+                'message': {
+                    'id': 24,
+                    'from': 1,
+                    'to': 4,
+                    'content': 'Hi there! This is a message lmao uwu',
+                    'created_at': '2024-03-13 19:22:05'
+                }
+            }
+        ]
+    ```
+
+    Args:
+        sid (_type_): Socket ID. Autopopulated on request by SocketIO Client.
+        user_id (_type_): User ID that the client wants to listen for messages from.
+    """
     # the user_id is taken from the database, not a room
     logger.debug(f"User {user_id} is listening for new messages (sid: {sid})")
 
@@ -158,6 +195,26 @@ async def chat_listen(sid, user_id):
 
 @sio.on("chats_listen", namespace="/webapp")
 async def chats_listen(sid):
+    """Sends all updates (from ALL CHATS) to the client, including the initiator's messages.
+    Messages from this event handler are in the following format:
+    ```
+        [
+            'chat_message',
+            {
+                'message': {
+                    'id': 24,
+                    'from': 1,
+                    'to': 4,
+                    'content': 'Hi there! This is a message lmao uwu',
+                    'created_at': '2024-03-13 19:22:05'
+                }
+            }
+        ]
+    ```
+
+    Args:
+        sid (_type_): Socket ID. Autopopulated on request by SocketIO Client.
+    """
     # Same as chat_listen, but for all chats of the user
     # the user_id is taken from the database, not a room
     logger.debug(f"User is listening for new chats (sid: {sid})")
@@ -232,6 +289,12 @@ async def chats_listen(sid):
 
 @sio.on(event="chat_send", namespace="/webapp")
 async def chat_send(sid, message):
+    """Receives a message from the client and saves it to the database, then sends to the recipient using Websockets.
+
+    Args:
+        sid (_type_): Socket ID. Autopopulated on request by SocketIO Client.
+        message (_type_): Message object in the following format: `{"message": {"to": 4, "content": f"send_msg_counter: {send_msg_counter}"}}`
+    """
     # Receive messages from SIO client
     logger.debug(f"Received chat message from {sid}: {message}")
     my_user = await sio.get_session(sid, namespace="/webapp")
