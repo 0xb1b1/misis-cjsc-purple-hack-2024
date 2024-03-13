@@ -9,7 +9,7 @@ async def run():
     async with socketio.AsyncSimpleClient() as sio:
         await sio.connect("http://127.0.0.1:8080", namespace="/webapp")
         # Authenticate with JWT TOKEN
-        await sio.emit("auth", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJqZWN0Ijp7ImlkIjoxLCJlbWFpbCI6InVzZXIwQHRlc3QuY29tIiwicm9sZSI6InVzZXIifSwidHlwZSI6ImFjY2VzcyIsImV4cCI6MTcxMjk0NTI2OCwiaWF0IjoxNzEwMzUzMjY4LCJqdGkiOiJiMjUxYzM5Yi04OGIzLTQwMzQtOGM4Zi1jNTEyYzAwOGUzNGEifQ.KY3GKEIHOjxS51b0ja2kLljTO-pEZcFw9cBFKHJNoiQ")
+        await sio.emit("auth", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWJqZWN0Ijp7ImlkIjowLCJlbWFpbCI6Im9wZXJhdG9yNEB0ZXN0LmNvbSIsInJvbGUiOiJvcGVyYXRvciJ9LCJ0eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzEyOTU4OTA4LCJpYXQiOjE3MTAzNjY5MDgsImp0aSI6IjYxYTQzZmQ0LTRkZGMtNGRjMy1hYWZjLWQxZDk4YzhkNWVmMyJ9.sNjKb9YJZVPw4bk7da81yIG8f5DMJargQ_99r_ZTkkY")
 
         # Wait for the server to respond
         event = await sio.receive()

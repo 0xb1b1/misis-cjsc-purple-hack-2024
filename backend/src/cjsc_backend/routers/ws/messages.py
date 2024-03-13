@@ -222,6 +222,7 @@ async def chats_listen(sid):
     logger.debug(f"User is listening for new chats (sid: {sid})")
 
     my_user = await sio.get_session(sid, namespace="/webapp")
+    await asyncio.sleep(0.5)
     logger.debug(f"Got user from SIO: {my_user}")
     my_user_id = my_user["user"]["subject"]["id"]
 
@@ -286,6 +287,11 @@ async def chats_listen(sid):
                 room=sid,
                 namespace="/webapp"
             )
+            await sio.disconnect(sid, namespace="/webapp")
+            return
+
+        except TimeoutError:
+            logger.error(f"Failed to send chat messages to {sid}; client probably disconnected")
             await sio.disconnect(sid, namespace="/webapp")
             return
         # IMPORTANT: Do not spam TODO: check the sleep duration performance
