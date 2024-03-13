@@ -112,7 +112,7 @@ or other error: {e}"
     "/me/token",
     response_model=UserInfoSchema,
 )
-def auth_token_info(
+async def auth_token_info(
     credentials: JwtAuthorizationCredentials = Security(
         config.jwt_ac,
     ),
@@ -128,7 +128,7 @@ def auth_token_info(
     "/me/full",
     response_model=UserBaseSchema,
 )
-def auth_full_info(
+async def auth_full_info(
     credentials: JwtAuthorizationCredentials = Security(
         config.jwt_ac,
     ),

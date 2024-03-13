@@ -8,12 +8,12 @@ CREATE TABLE IF NOT EXISTS users (
   last_name TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX users_email_idx ON users(email);
-CREATE INDEX users_role_idx ON users(role);
+CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
+CREATE INDEX IF NOT EXISTS users_role_idx ON users(role);
 
 -- Operator pseudo-user
 INSERT INTO USERS (id, email, password_hash, role, first_name)
-VALUES (0, 'operator@testingcbr.id', '', 'operator', '??');
+VALUES (0, 'operator@testingcbr.id', '', 'operator', 'Оператор');
 
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS messages (
   content TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-CREATE INDEX messages_from_idx ON messages(from_user_id);
-CREATE INDEX messages_to_idx ON messages(to_user_id);
-CREATE INDEX messages_from_to_idx ON messages(from_user_id, to_user_id);
-CREATE INDEX messages_from_to_ts_idx ON messages(from_user_id, to_user_id, created_at);
+CREATE INDEX IF NOT EXISTS messages_from_idx ON messages(from_user_id);
+CREATE INDEX IF NOT EXISTS messages_to_idx ON messages(to_user_id);
+CREATE INDEX IF NOT EXISTS messages_from_to_idx ON messages(from_user_id, to_user_id);
+CREATE INDEX IF NOT EXISTS messages_from_to_ts_idx ON messages(from_user_id, to_user_id, created_at);

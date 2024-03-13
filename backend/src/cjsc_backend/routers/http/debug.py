@@ -22,7 +22,7 @@ router = APIRouter(
 
 
 @router.get("/users/all")
-def debug_users_all():
+async def debug_users_all():
     logger.debug("Listing all users...")
     with db.cursor() as curs:
         try:

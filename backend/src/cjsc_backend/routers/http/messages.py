@@ -25,7 +25,7 @@ router = APIRouter(
 @router.post(
     "/chats",
 )
-def messages_get_chats(
+async def messages_get_chats(
     credentials: JwtAuthorizationCredentials = Security(
         config.jwt_ac,
     ),
