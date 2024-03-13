@@ -220,6 +220,7 @@ async def chats_listen(sid):
     logger.debug(f"User is listening for new chats (sid: {sid})")
 
     my_user = await sio.get_session(sid, namespace="/webapp")
+    logger.debug(f"Got user from SIO: {my_user}")
     my_user_id = my_user["user"]["subject"]["id"]
 
     last_msg_id = None
