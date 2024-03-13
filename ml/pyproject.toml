@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "misis-cjsc-purple-hack-2024-ml"
+packages = [{include = "cjsc_ml", from="src"}]
+version = "0.0.1"
+description = ""
+authors = ["0xb1b1 <hello@axelreitenbach.online>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+
+[tool.poetry.scripts]
+start = "cjsc_ml.main:run"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+ipykernel = "^6.27.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
