@@ -207,6 +207,11 @@ async def chats_listen(sid):
                 )
             last_msg_id = msgs[-1].id + 1 if len(msgs) > 0 else last_msg_id
 
+            # Mark messages sent by all users that communicate with the user as read
+            for msg in msgs:
+                if msg.to_user_id == my_user_id:
+                    messages.mark_as_read_message(db, my_user_id, msg.id)
+
         except DatabaseError as e:
             logger.error(f"Failed to get chat messages (database): {e}")
             # disconnect client on exception (and send error message)

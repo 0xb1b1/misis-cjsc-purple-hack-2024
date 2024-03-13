@@ -35,3 +35,18 @@ class UserInfoSchema(BaseModel):
     id: int
     email: EmailStr
     role: str
+
+
+class UserChatEntrySchema(BaseModel):
+    id: int
+    first_name: str
+    last_name: str | None = None
+    avatar_url: str | None = None
+    unread_count: int | None = None
+    last_message_content: str | None = None
+    last_message_created_at: datetime | None = None
+
+
+class UserChatEntriesSchema(BaseModel):
+    chats: list[int]
+    users: dict[int, UserChatEntrySchema]

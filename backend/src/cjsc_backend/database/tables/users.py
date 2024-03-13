@@ -6,15 +6,14 @@ from psycopg2 import DatabaseError
 from cjsc_backend.routers.http.schemas.user import UserLoginSchema, UserBaseSchema, UserSignupSchema
 
 
-def get(conn, uid: int | None = None, email: str | None = None) -> str:
-    if not uid and not email:
-        logger.error("No user identifier provided")
-        return None
-
-    if uid:
+def get(conn, uid: int | None = None, email: str | None = None) -> UserBaseSchema:
+    logger.debug(f"Getting user by uid: {uid} or email: {email}")
+    if uid is not None:
         return _get_by_uid(conn, uid)
-    elif email:
+    elif email is not None:
         return _get_by_email(conn, email)
+    else:
+        raise ValueError("Must provide either uid or email")
 
 
 def create(conn, user: UserSignupSchema) -> str:
@@ -44,7 +43,7 @@ first_name, last_name, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
             raise e
 
 
-def _get_by_email(conn, email: str) -> str:
+def _get_by_email(conn, email: str) -> UserBaseSchema:
     with conn.cursor() as curs:
         try:
             curs.execute("SELECT id, email, password_hash, avatar_url, role, \
@@ -68,5 +67,24 @@ first_name, last_name, created_at FROM users WHERE email = %s", (email,))
     )
 
 
-def _get_by_uid(conn, uid: int) -> str:
-    return None
+def _get_by_uid(conn, uid: int) -> UserBaseSchema:
+    with conn.cursor() as curs:
+        try:
+            curs.execute("SELECT id, email, password_hash, avatar_url, role, \
+first_name, last_name, created_at FROM users WHERE id = %s", (uid,))
+            user = curs.fetchone()
+        except DatabaseError as e:
+            logger.error(f"Failed to get user by uid, rolling back: {e}")
+            conn.rollback()
+            raise e
+
+    return UserBaseSchema(
+        id=user[0],
+        email=user[1],
+        password_hash=user[2],
+        avatar_url=user[3],
+        role=user[4],
+        first_name=user[5],
+        last_name=user[6],
+        created_at=user[7],
+    )
