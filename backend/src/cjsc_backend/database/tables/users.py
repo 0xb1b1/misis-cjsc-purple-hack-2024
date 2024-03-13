@@ -88,3 +88,16 @@ first_name, last_name, created_at FROM users WHERE id = %s", (uid,))
         last_name=user[6],
         created_at=user[7],
     )
+
+
+def is_operator(conn, uid: int) -> bool:
+    with conn.cursor() as curs:
+        try:
+            curs.execute("SELECT role FROM users WHERE id = %s", (uid,))
+            role = curs.fetchone()
+        except DatabaseError as e:
+            logger.error(f"Failed to get user role, rolling back: {e}")
+            conn.rollback()
+            raise e
+
+    return role[0] == "operator"

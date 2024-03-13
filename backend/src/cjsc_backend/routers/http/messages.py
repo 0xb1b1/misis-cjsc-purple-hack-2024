@@ -70,7 +70,8 @@ async def messages_get_chats(
 
     return {
         "chats": chats,
-        "users": users
+        "users": users,
+        "is_operator": db_users.is_operator(db, credentials["id"])
     }
 
 

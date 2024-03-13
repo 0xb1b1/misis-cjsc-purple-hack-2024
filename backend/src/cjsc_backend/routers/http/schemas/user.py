@@ -50,3 +50,4 @@ class UserChatEntrySchema(BaseModel):
 class UserChatEntriesSchema(BaseModel):
     chats: list[int]
     users: dict[int, UserChatEntrySchema]
+    is_operator: bool = False
