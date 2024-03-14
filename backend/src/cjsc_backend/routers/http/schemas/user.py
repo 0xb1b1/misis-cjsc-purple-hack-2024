@@ -45,6 +45,8 @@ class UserChatEntrySchema(BaseModel):
     unread_count: int | None = None
     last_message_content: str | None = None
     last_message_created_at: datetime | None = None
+    chat_session_expired: bool | None = None
+    ml_allowed: bool | None = None
 
 
 class UserChatEntriesSchema(BaseModel):

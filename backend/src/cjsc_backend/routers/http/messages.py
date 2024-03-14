@@ -7,6 +7,7 @@ from psycopg2 import DatabaseError
 from cjsc_backend import config
 from cjsc_backend.database.tables import messages as db_msgs
 from cjsc_backend.database.tables import users as db_users
+from cjsc_backend.database.tables import chat_sessions as db_chat_sessions
 from cjsc_backend.database.connect import create_connection_with_config
 from cjsc_backend.routers.http.schemas.token import TokenSchema
 # from cjsc_backend.routers.http.schemas.user import UserBaseSchema, \
@@ -59,6 +60,19 @@ async def messages_get_chats(
         )
         logger.debug(f"Getting info about user {chat}")
         user_info = db_users.get(db, uid=chat)
+        is_session_expired = db_chat_sessions.is_latest_session_expired(
+            db,
+            credentials["id"],
+            chat,
+        )
+        if not is_session_expired:
+            session = db_chat_sessions.get_latest_chat_session(
+                db,
+                credentials["id"],
+                chat,
+            )
+        else:
+            session = None
         users[chat] = UserChatEntrySchema(
             id=user_info.id,
             first_name=user_info.first_name,
@@ -67,6 +81,8 @@ async def messages_get_chats(
             unread_count=db_msgs.get_unread_count(db, chat, my_user.id),
             last_message_content=latest_message.content,
             last_message_created_at=datetime.strftime(latest_message.created_at, "%Y-%m-%d %H:%M:%S"),
+            chat_session_expired=is_session_expired,
+            ml_allowed=session.allow_ml if session is not None else None,
         )
 
     return {
@@ -123,3 +139,22 @@ async def messages_send(ca_secret: str, msg: Message):
 
 async def get_user_info():
     pass
+
+
+@router.post(
+    "/config/set/allow_ml",
+)
+async def messages_config_set_allow_ml(
+    peer_id: int,
+    allow_ml: bool,
+    credentials: JwtAuthorizationCredentials = Security(
+        config.jwt_ac,
+    ),
+):
+    logger.debug(
+        f"Setting allow_ml for user {credentials["id"]} and {peer_id} to {allow_ml}"
+    )
+    db_chat_sessions.set_allow_ml(db, credentials["id"], peer_id, allow_ml)
+    return {
+        "status": "ok",
+    }
