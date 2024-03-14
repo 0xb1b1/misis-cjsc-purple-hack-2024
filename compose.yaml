@@ -1,0 +1,26 @@
+---
+# Для запуска без Traefik необходимо пробросить порты вручную (указаны в traefik.http.services.${TRAEFIK_SERVICE_NAME}-*.loadbalancer.server.port=)
+name: "purple-hack-project"
+
+services:
+  backend:
+    image: 0xb1b1/cjsc-backend-purple-hack-2024:latest
+    restart: always
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.${TRAEFIK_SERVICE_NAME}-backend.loadbalancer.server.port=8080"
+      - "traefik.http.routers.${TRAEFIK_SERVICE_NAME}-backend.rule=Host(`cjsc-backend.seizure.icu`)"
+      - "traefik.http.routers.${TRAEFIK_SERVICE_NAME}-backend.entrypoints=websecure"
+      - "traefik.http.routers.${TRAEFIK_SERVICE_NAME}-backend.tls=true"
+
+  frontend:
+    image: 0xb1b1/cjsc-frontend-purple-hack-2024:latest
+    restart: always
+    env_file: .env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.${TRAEFIK_SERVICE_NAME}-frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.${TRAEFIK_SERVICE_NAME}-frontend.rule=Host(`cjsc.seizure.icu`)"
+      - "traefik.http.routers.${TRAEFIK_SERVICE_NAME}-frontend.entrypoints=websecure"
+      - "traefik.http.routers.${TRAEFIK_SERVICE_NAME}-frontend.tls=true"
