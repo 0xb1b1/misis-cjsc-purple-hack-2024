@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import json
 import uvicorn
 import redis
 import sys
@@ -23,13 +24,14 @@ def push_to_queue(redis_conn, item):
 @app.post("/query_ml")
 async def query_ml(mr: MessageRequest):
     # Push the request to the queue
-    push_to_queue(redis_conn, mr.json())
+
+    push_to_queue(redis_conn, json.dumps(mr.model_dump(exclude_unset=True)))
     return {"status": "ok"}
 
 
-@app.post("/ml_answer")
-async def ml_answer(m: Message):
-    ...  # Send POST to backend with the message
+# @app.post("/ml_answer")
+# async def ml_answer(m: Message):
+#     ...  # Send POST to backend with the message
 
 
 def run():
