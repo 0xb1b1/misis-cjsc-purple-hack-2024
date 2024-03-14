@@ -1,30 +1,24 @@
-# React + TypeScript + Vite
+# Название Проекта
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Это чат-приложение, построенное с помощью React, TypeScript и Vite. Оно использует MobX для управления состоянием и Socket.IO для передачи real-time.
 
-Currently, two official plugins are available:
+## Структура Проекта
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- `src/api`: содержит модели и служебные функции для взаимодействия API.
+- `src/components`: содержит компоненты React, используемые в приложении.
+- `src/stores`: содержит хранилища MobX для управления состоянием.
+- `src/routes`: содержит маршруты приложения.
+- `src/assets`: содержит статические ресурсы, такие как изображения и шрифты.
 
-## Expanding the ESLint configuration
+## Начало Работы
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+1. Клонируйте репозиторий.
+2. Установите зависимости с помощью команды "npm install".
+3. запустите сервер разработки с помощью команды "npm run dev".
 
-- Configure the top-level `parserOptions` property like this:
+## Ключевые Особенности
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
-    project: ["./tsconfig.json", "./tsconfig.node.json"],
-    tsconfigRootDir: __dirname
-  }
-};
-```
+- Чат в реальном времени: пользователи могут отправлять и получать сообщения в режиме реального времени.
+- Аутентификация: пользователи могут аутентифицироваться с помощью токенов JWT.
+- Адаптивный дизайн.
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
