@@ -29,11 +29,6 @@ async def query_ml(mr: MessageRequest):
     return {"status": "ok"}
 
 
-# @app.post("/ml_answer")
-# async def ml_answer(m: Message):
-#     ...  # Send POST to backend with the message
-
-
 def run():
     uvicorn.run(
         app,
