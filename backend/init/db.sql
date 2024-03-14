@@ -30,6 +30,13 @@ CREATE INDEX IF NOT EXISTS messages_to_idx ON messages(to_user_id);
 CREATE INDEX IF NOT EXISTS messages_from_to_idx ON messages(from_user_id, to_user_id);
 CREATE INDEX IF NOT EXISTS messages_from_to_ts_idx ON messages(from_user_id, to_user_id, created_at);
 
+-- Whether the chat_session is active or not is determined
+-- by the last message in the database and this parameter
+-- is generated during runtime.
+-- -------------------
+-- The created_at field is set when the chat_session is created,
+-- which is done when a new message is received and the previous
+-- chat session expired according to an env variable.
 CREATE TABLE IF NOT EXISTS chat_sessions (
   id SERIAL PRIMARY KEY,
   user_1_id INTEGER NOT NULL REFERENCES users(id),

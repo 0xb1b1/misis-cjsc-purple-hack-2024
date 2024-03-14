@@ -3,11 +3,33 @@ import json
 import redis
 from transformers import GenerationConfig, AutoModel, AutoTokenizer, M2M100ForConditionalGeneration, M2M100Tokenizer, AutoModelForSeq2SeqLM
 from clickhouse_driver import Client
+from pydantic import BaseModel
+from datetime import datetime
 
 from cjsc_ml.models import DistilledModel, Retriever, Corrector, Chat
 from cjsc_ml.utils import seed_everything
 from cjsc_ml.config import Config
 from cjsc_ml.clickhouse import ClickHouse
+
+
+
+# Pydantic models
+class Message(BaseModel):  # Same as backend
+    id: int | None = None
+    from_user_id: int
+    to_user_id: int
+    is_read: bool = False
+    content: str
+    created_at: datetime = datetime.now()
+
+
+class MessageRequestConfig(BaseModel):
+    allow_faq: bool
+
+
+class MessageRequest(BaseModel):
+    message: Message
+    config: MessageRequestConfig
 
 
 def pop_from_queue(redis_conn):
@@ -81,7 +103,7 @@ def run():
         res = pop_from_queue(redis_conn)
         
         if res:
-            request = json.loads(res.decode("utf-8"))
+            request = json.loads(res.decode("utf-8")) # MessageRequest
             """
             payload: dict = {
                 "message": {"id": int, "content": str}, 
@@ -89,9 +111,11 @@ def run():
                 }
             """
             
-            id = request["message"]["id"]
+            # id = request["message"]["id"]
+            from_user_id = request["message"]["to_user_id"]
+            to_user_id = request["message"]["from_user_id"]
             allow_faq = request["config"]["allow_faq"]
-            message = request["message"]["content"]
+            message_content = request["message"]["content"]
             
             
             """
@@ -101,12 +125,23 @@ def run():
                             }
             """
     
-            response_text = chat.answer(message, allow_faq=allow_faq)
-    
-            response = {
-                "message": {"id": id},
-                "response": {"content": response_text}
-            }
+            response_text = chat.answer(message_content, allow_faq=allow_faq)
+
+            message = Message(
+                from_user_id=from_user_id, 
+                to_user_id=to_user_id
+                message_content=response_text
+            )
+
+            r = requests.post(
+                "http://127.0.0.1:8080/msg/send",
+                json=message.model_dump(exclude_unset=True),
+                params={"ca_secret": getenv("CJSC_CROSS_APP_SECRET")}
+            )
+
+            
+
+            
 
 if __name__ == "__main__":
     run()
