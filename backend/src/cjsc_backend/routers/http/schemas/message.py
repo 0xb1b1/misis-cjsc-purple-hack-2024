@@ -10,3 +10,13 @@ class Message(BaseModel):
     is_read: bool = False
     content: str
     created_at: datetime = datetime.now()
+
+
+# For ML-Queue
+class MessageRequestConfig(BaseModel):
+    allow_faq: bool
+
+
+class MessageRequest(BaseModel):
+    message: Message
+    config: MessageRequestConfig
