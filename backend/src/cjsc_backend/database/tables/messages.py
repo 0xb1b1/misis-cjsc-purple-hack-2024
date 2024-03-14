@@ -149,6 +149,7 @@ def create_chat_message(conn, message: Message):
         conn (_type_): PostgreSQL connection object.
         message (Message): Message object to be inserted into the database.
     """
+    logger.debug(f"Creating chat message: {message}")
     with conn.cursor() as curs:
         try:
             curs.execute(
@@ -156,6 +157,7 @@ def create_chat_message(conn, message: Message):
                 (message.from_user_id, message.to_user_id, message.content)
             )
             conn.commit()
+            logger.debug(f"Rows affected: {curs.rowcount}")
         except DatabaseError as e:
             logger.error(f"Failed to create chat message: {e}")
             conn.rollback()

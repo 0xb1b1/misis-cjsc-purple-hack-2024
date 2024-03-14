@@ -13,6 +13,7 @@ from cjsc_backend.routers.http.schemas.token import TokenSchema
 #     UserLoginSchema, UserInfoSchema, UserSignupSchema
 from cjsc_backend.routers.http.schemas.user import UserChatEntriesSchema, \
     UserChatEntrySchema
+from cjsc_backend.routers.http.schemas.message import Message
 
 # See https://fastapi.tiangolo.com/tutorial/bigger-applications/
 
@@ -72,6 +73,51 @@ async def messages_get_chats(
         "chats": chats,
         "users": users,
         "is_operator": db_users.is_operator(db, credentials["id"])
+    }
+
+
+# Intended for ML functionality
+@router.post(
+    "/send",
+)
+async def messages_send(ca_secret: str, msg: Message):
+    """This method is intended to be used by the ML part of the system.
+    Send a message object with **correctly configured** `from_user_id`
+    and `to_user_id` fields to send a message. `from_user_id` should
+    always be `0`, so a 4XX error will be thrown if this is not the case.
+
+    Args:
+        ca_secret (str): Cross-app secret between ML and the backend. Will throw 403 if incorrect.
+        msg (Message): Message object to send.
+    """
+    logger.debug(f"Received message from ML: {msg}")
+    if ca_secret != config.CROSS_APP_SECRET:
+        logger.debug(f"Received incorrect cross-app secret: {ca_secret}")
+        raise HTTPException(
+            status_code=403,
+            detail="Incorrect cross-app secret",
+        )
+
+    if msg.from_user_id != 0:
+        logger.warning(f"Received message with incorrect from_user_id: {msg.from_user_id}")
+        raise HTTPException(
+            status_code=400,
+            detail="from_user_id must be 0",
+        )
+
+    if msg.to_user_id == 0:
+        logger.warning(f"Received message with incorrect to_user_id: {msg.to_user_id}")
+        raise HTTPException(
+            status_code=400,
+            detail="to_user_id must not be 0",
+        )
+
+    logger.debug(f"Sending message: {msg}")
+    # Websocket clients will receive this message after ws/messages.py scans it
+    db_msgs.create_chat_message(db, msg)
+    logger.debug(f"Message sent: {msg}")
+    return {
+        "status": "ok",
     }
 
 

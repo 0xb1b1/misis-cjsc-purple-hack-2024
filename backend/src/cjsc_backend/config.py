@@ -33,7 +33,7 @@ logger.info(f"Webserver port set to `{WEBSERVER_PORT}`")
 JWT_SECRET_KEY = os.getenv("CJSC_BACKEND_JWT_SECRET_KEY", "")
 JWT_ACCESS_EXPIRATION_MINUTES = int(
     os.getenv(
-        "CJSC_BACKEND_JWT_ACCESS_EXPIRATION_MINUTES",
+        "CJSC_BACKEND_JWT_ACCESS_EXPIRATION_DAYS",
         "30",
     )
 )
@@ -65,6 +65,12 @@ CHAT_EXPIRY_MINUTES = int(
         "20",
     )
 )
+
+# Cross-app authentication
+CROSS_APP_SECRET = os.getenv("CJSC_CROSS_APP_SECRET", "")
+if CROSS_APP_SECRET == "":
+    logger.critical("Cross-app secret is not specified.")
+    is_run_fatal = True
 
 ########
 if is_run_fatal:
