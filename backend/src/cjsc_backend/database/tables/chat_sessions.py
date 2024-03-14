@@ -19,4 +19,33 @@ def get_latest_chat_session(conn, message: Message) -> ChatSession:
     ...
 
 
-# def _check
+def _is_latest_session_expired(conn, peer_1_id, peer_2_id) -> bool:
+    """Check if the last session stored in the database is expired.
+
+    Args:
+        conn (_type_): PostgreSQL connection object.
+        peer_1_id (_type_): User ID of the first peer.
+        peer_2_id (_type_): User ID of the second peer.
+
+    Returns:
+        bool: True if the last session is expired, False otherwise.
+    """
+    with conn.cursor() as curs:
+        try:
+            curs.execute(
+                "SELECT created_at FROM chat_sessions WHERE \
+(user_1_id = %s AND user_2_id = %s) OR (user_1_id = %s AND user_2_id = %s) \
+ORDER BY created_at DESC LIMIT 1",
+                (peer_1_id, peer_2_id, peer_2_id, peer_1_id),
+            )
+            last_session = curs.fetchone()
+        except DatabaseError as e:
+            logger.error(f"Failed to get last session: {e}")
+            conn.rollback()
+            raise e
+
+    if last_session is None:
+        return True
+
+    last_session = last_session[0]
+    return last_session < datetime.now() - timedelta(minutes=30)
