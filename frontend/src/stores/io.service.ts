@@ -12,7 +12,7 @@ class SocketIoViewModel {
 
   private hasConnected = false;
   init(token: string) {
-    this.io = io("ws://localhost:8080/webapp", {
+    this.io = io("wss://cjsc-backend.seizure.icu/webapp", {
       transports: ["websocket"]
     });
 
