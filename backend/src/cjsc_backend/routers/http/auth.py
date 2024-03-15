@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-from fastapi import APIRouter, Security, HTTPException
+import bcrypt
+from cjsc_backend import config
+from cjsc_backend.database.connect import create_connection_with_config
+from cjsc_backend.database.tables import users
+from cjsc_backend.routers.http.schemas.token import TokenSchema
+from cjsc_backend.routers.http.schemas.user import (
+    UserBaseSchema,
+    UserInfoSchema,
+    UserLoginSchema,
+    UserSignupSchema,
+)
+from fastapi import APIRouter, HTTPException, Security
 from fastapi_jwt import JwtAuthorizationCredentials
 from loguru import logger
-import bcrypt
 from psycopg2 import DatabaseError
-from cjsc_backend import config
-from cjsc_backend.database.tables import users
-from cjsc_backend.database.connect import create_connection_with_config
-from cjsc_backend.routers.http.schemas.token import TokenSchema
-from cjsc_backend.routers.http.schemas.user import UserBaseSchema, \
-    UserLoginSchema, UserInfoSchema, UserSignupSchema
 
 # See https://fastapi.tiangolo.com/tutorial/bigger-applications/
 
@@ -17,9 +21,11 @@ db = create_connection_with_config()
 
 router = APIRouter(
     prefix="/auth",
-    tags=['Authentication', ],
+    tags=[
+        "Authentication",
+    ],
     # dependencies=[Depends(get_token_header)],
-    responses={404: {"description": "Not found"}}
+    responses={404: {"description": "Not found"}},
 )
 
 
@@ -28,8 +34,7 @@ router = APIRouter(
     response_model=TokenSchema,
 )
 async def signup(credentials: UserSignupSchema):
-    logger.debug(
-        f"A user tries to sign up (email: {credentials.email})")
+    logger.debug(f"A user tries to sign up (email: {credentials.email})")
 
     try:
         users.create(db, credentials)
@@ -58,11 +63,7 @@ or other error: {e}"
         "role": user.role,
     }
 
-    return {
-        "access_token": config.jwt_ac.create_access_token(
-            subject=subject
-        )
-    }
+    return {"access_token": config.jwt_ac.create_access_token(subject=subject)}
 
 
 @router.post(
@@ -70,9 +71,7 @@ or other error: {e}"
     response_model=TokenSchema,
 )
 async def login(credentials: UserLoginSchema):
-    logger.debug(
-        f"A user tries to sign in (email: {credentials.email})..."
-    )
+    logger.debug(f"A user tries to sign in (email: {credentials.email})...")
 
     try:
         user = users.get(db, email=credentials.email)
@@ -87,7 +86,9 @@ or other error: {e}"
 or other error: {e}"
         )
     logger.debug(f"Got user from DB: {user}")
-    logger.critical(f"User password hash: {str(user.password_hash.encode('utf-8').decode())}")
+    logger.critical(
+        f"User password hash: {str(user.password_hash.encode('utf-8').decode())}"
+    )
 
     # Check BCrypt hash
     is_password_correct = bcrypt.checkpw(
@@ -106,11 +107,7 @@ or other error: {e}"
         "email": user.email,
         "role": user.role,
     }
-    return {
-        "access_token": config.jwt_ac.create_access_token(
-            subject=subject
-        )
-    }
+    return {"access_token": config.jwt_ac.create_access_token(subject=subject)}
 
 
 @router.get(

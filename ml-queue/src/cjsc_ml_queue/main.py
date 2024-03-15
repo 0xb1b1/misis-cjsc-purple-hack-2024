@@ -1,24 +1,21 @@
 #!/usr/bin/env python3
 import json
-import uvicorn
-import redis
 import sys
+
+import redis
+import uvicorn
+from cjsc_ml_queue.models import MessageRequest
 from fastapi import FastAPI
-from cjsc_ml_queue.models import Message, MessageRequestConfig, MessageRequest
 
 app = FastAPI()
 
 # Connect to the Redis server
-redis_conn = redis.Redis(
-    host='localhost',
-    port=6379,
-    db=0
-)
+redis_conn = redis.Redis(host="localhost", port=6379, db=0)
 
 
 # Function to push an item to the queue
 def push_to_queue(redis_conn, item):
-    redis_conn.lpush('requests', item)
+    redis_conn.lpush("requests", item)
 
 
 @app.post("/query_ml")

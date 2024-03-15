@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+from datetime import datetime
+
 import requests
 from pydantic import BaseModel
-from datetime import datetime
 
 
 # Pydantic models
@@ -25,13 +26,9 @@ class MessageRequest(BaseModel):
 
 mr = MessageRequest(
     message=Message(
-        from_user_id=1,
-        to_user_id=0,
-        content="Hello, this is a test message."
+        from_user_id=1, to_user_id=0, content="Hello, this is a test message."
     ),
-    config=MessageRequestConfig(
-        allow_faq=True
-    )
+    config=MessageRequestConfig(allow_faq=True),
 )
 
 mr_json = mr.model_dump(exclude_unset=True)

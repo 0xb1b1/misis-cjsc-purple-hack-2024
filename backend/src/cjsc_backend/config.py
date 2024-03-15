@@ -2,25 +2,25 @@
 
 import os
 import sys
-from loguru import logger
-from fastapi_jwt import JwtAccessBearer
 from datetime import timedelta
 
 from cjsc_backend.setup import webserver_port
+from fastapi_jwt import JwtAccessBearer
+from loguru import logger
 
 is_run_fatal = False
 
 # if file ./dev.flag exists, load_dotenv()
 if os.path.isfile("./dev.flag"):
-    logger.warning("Loading environment variables from .env file... (`dev.flag` detected)")
+    logger.warning(
+        "Loading environment variables from .env file... (`dev.flag` detected)"
+    )
     from dotenv import load_dotenv
+
     load_dotenv()
     logger.info("Loaded environment variables from .env file.")
 
-WEBSERVER_HOST: str = os.getenv(
-    "CJSC_BACKEND_WEBSERVER_HOST",
-    "0.0.0.0"
-)
+WEBSERVER_HOST: str = os.getenv("CJSC_BACKEND_WEBSERVER_HOST", "0.0.0.0")
 logger.info(f"Webserver host set to `{WEBSERVER_HOST}`")
 
 WEBSERVER_PORT, IS_WEBSERVER_PORT_DEFAULT = webserver_port.validate_webserver_port(  # noqa: E501

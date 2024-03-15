@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 from datetime import datetime
+
 import bcrypt
+from cjsc_backend.routers.http.schemas.user import UserBaseSchema, UserSignupSchema
 from loguru import logger
 from psycopg2 import DatabaseError
-from cjsc_backend.routers.http.schemas.user import UserLoginSchema, UserBaseSchema, UserSignupSchema
 
 
 def get(conn, uid: int | None = None, email: str | None = None) -> UserBaseSchema:
@@ -26,9 +27,8 @@ first_name, last_name, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                 (
                     user.email,
                     bcrypt.hashpw(
-                        user.password.encode('utf-8'),
-                        bcrypt.gensalt()
-                    ).decode('utf-8'),
+                        user.password.encode("utf-8"), bcrypt.gensalt()
+                    ).decode("utf-8"),
                     None,
                     "user",
                     user.first_name,
@@ -46,8 +46,11 @@ first_name, last_name, created_at) VALUES (%s, %s, %s, %s, %s, %s, %s)",
 def _get_by_email(conn, email: str) -> UserBaseSchema:
     with conn.cursor() as curs:
         try:
-            curs.execute("SELECT id, email, password_hash, avatar_url, role, \
-first_name, last_name, created_at FROM users WHERE email = %s", (email,))
+            curs.execute(
+                "SELECT id, email, password_hash, avatar_url, role, \
+first_name, last_name, created_at FROM users WHERE email = %s",
+                (email,),
+            )
             user = curs.fetchone()
         except DatabaseError as e:
             logger.error(f"Failed to get user by email, rolling back: {e}")
@@ -73,8 +76,11 @@ first_name, last_name, created_at FROM users WHERE email = %s", (email,))
 def _get_by_uid(conn, uid: int) -> UserBaseSchema:
     with conn.cursor() as curs:
         try:
-            curs.execute("SELECT id, email, password_hash, avatar_url, role, \
-first_name, last_name, created_at FROM users WHERE id = %s", (uid,))
+            curs.execute(
+                "SELECT id, email, password_hash, avatar_url, role, \
+first_name, last_name, created_at FROM users WHERE id = %s",
+                (uid,),
+            )
             user = curs.fetchone()
         except DatabaseError as e:
             logger.error(f"Failed to get user by uid, rolling back: {e}")

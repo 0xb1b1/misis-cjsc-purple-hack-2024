@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-from loguru import logger
-from psycopg2 import DatabaseError
 from datetime import datetime, timedelta
+
+from cjsc_backend import config
+from cjsc_backend.database.tables import messages as db_msgs
+
 # from cjsc_backend.routers.http.schemas.user import \
 #     UserLoginSchema, UserBaseSchema
 # from cjsc_backend.routers.http.schemas.message import Message
 from cjsc_backend.routers.http.schemas.chat_session import ChatSession
-from cjsc_backend.database.tables import messages as db_msgs
-from cjsc_backend import config
+from loguru import logger
+from psycopg2 import DatabaseError
 
 # CREATE TABLE IF NOT EXISTS chat_sessions (
 #   id SERIAL PRIMARY KEY,
@@ -115,7 +117,9 @@ ORDER BY id DESC LIMIT 1",
     except TypeError:  # No messages found
         return True
 
-    return last_message.created_at < datetime.now() - timedelta(hours=config.CHAT_EXPIRY_MINUTES)
+    return last_message.created_at < datetime.now() - timedelta(
+        hours=config.CHAT_EXPIRY_MINUTES
+    )
 
 
 def set_allow_ml(conn, peer_1_id: int, peer_2_id: int, allow_ml: bool) -> None:

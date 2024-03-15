@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import psycopg2
-from psycopg2 import OperationalError
-from loguru import logger
 from cjsc_backend import config
+from loguru import logger
+from psycopg2 import OperationalError
 
 
 def create_connection_with_config():
@@ -22,9 +22,11 @@ def create_connection_with_config():
 
 
 def _create_connection(
-    db_name: str = None, db_user: str = None,
-    db_pass: str = None, db_host: str = None,
-    db_port: int | str = None
+    db_name: str = None,
+    db_user: str = None,
+    db_pass: str = None,
+    db_host: str = None,
+    db_port: int | str = None,
 ):
     """
     Create a connection to the PostgreSQL database.
@@ -53,7 +55,5 @@ def _create_connection(
         )
         logger.info("Connection to PostgreSQL DB successful.")
     except OperationalError as e:
-        logger.error(
-          f"Error during PostgreSQL connection establishment: '{e}'"
-        )
+        logger.error(f"Error during PostgreSQL connection establishment: '{e}'")
     return connection

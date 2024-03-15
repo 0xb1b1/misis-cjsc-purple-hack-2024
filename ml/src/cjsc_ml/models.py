@@ -1,31 +1,16 @@
-import os
-import random
-
-from joblib import dump, load
-from tqdm.auto import tqdm
-
-tqdm.pandas()
-import re
-
-import numpy as np
-import pandas as pd
-import scipy
-import sklearn
 import torch
 import torch.nn.functional as F
+from cjsc_ml.clickhouse import ClickHouse
 from datasets import Dataset
 from torch import nn
 from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
 from transformers import (
     AutoModel,
-    AutoModelForSeq2SeqLM,
     AutoTokenizer,
-    GenerationConfig,
-    M2M100ForConditionalGeneration,
-    M2M100Tokenizer,
 )
 
-from cjsc_ml.clickhouse import ClickHouse
+tqdm.pandas()  #! IDK if this will work. See the stop-coding tag to restore the original position of this line.
 
 
 class DistilledModel(nn.Module):
@@ -90,11 +75,13 @@ class Retriever:
         embeddings = []
 
         for batch in tqdm(dataloader):
-            input_ids, attention_masks = batch["input_ids"].squeeze(dim=1), batch[
-                "attention_mask"
-            ].squeeze(dim=1)
-            input_ids, attention_masks = input_ids.to(self.device), attention_masks.to(
-                self.device
+            input_ids, attention_masks = (
+                batch["input_ids"].squeeze(dim=1),
+                batch["attention_mask"].squeeze(dim=1),
+            )
+            input_ids, attention_masks = (
+                input_ids.to(self.device),
+                attention_masks.to(self.device),
             )
 
             with torch.no_grad():

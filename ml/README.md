@@ -1,56 +1,69 @@
-Классы:
+# ML
 
-clickhouse.py
+## Классы
 
-Класс дистиллированной модели: является оберткой над другими моделями для того чтоб проводить дистилляцию модели и одновременно сжимать ее аутпут до latent_size'a
-```
-DistilledModel(
-    model, 
+### `clickhouse.py`
+
+Класс дистиллированной модели: является оберткой над другими моделями для того чтоб проводить дистилляцию модели и одновременно сжимать ее аутпут до latent_size'a:
+
+```python
+class DistilledModel(
+    model,
     latent_size: int = 64
 )
 ```
 
+### `models.py`
 
-models.py
+#### `Retriever`
 
-Класс Retriever осуществляет получения эмбеддинга от запросов юзера а так же эмбеддингов из предоставледдынх датасетов. Также записыывает датасеты в ClickHouse и достает самые похожие семплы из ClickHouse
-```
-Retriever(
-	model: AutoModel,
+Класс Retriever осуществляет получения эмбеддинга от запросов юзера а так же эмбеддингов из предоставледдынх датасетов. Также записыывает датасеты в ClickHouse и достает самые похожие семплы из ClickHouse:
+
+```python
+class Retriever(
+    model: AutoModel,
     tokenizer: AutoTokenizer,
     clickhouse: ClickHouse,
     batch_size: int = 1,
     device: str = "cuda",
     mode: str = "documents",
 )
+```
 
+Методы:
+
+```python
 Retriever.add
 
-Retriever._preprocess_dataset # 
+Retriever._preprocess_dataset
 
-Retriever._get_embedding Извлекает эмбеддинг из текста
+Retriever._get_embedding  # Извлекает эмбеддинг из текста
 
-Retriever.query Ищет ближайший вектор в ClickHouse
+Retriever.query  # Ищет ближайший вектор в ClickHouse
 
-Retriever.__len__ возвращает размер датасета по которому делает поиск
+Retriever.__len__  # возвращает размер датасета по которому делает поиск
 ```
 
-Классс для исправления ошибок пользователей
-```
-Corrector(
-    model, 
+#### Классс для исправления ошибок пользователей
+
+```python
+class Corrector(
+    model,
     tokenizer
 )
 ```
 
-Класс Chat является основным классом который:
+#### `Chat`
+
+Класс `Chat` является основным классом который:
+
 1. Принимает запросы юзеров
 2. Правит ошибки и опечатки
 3. Ищет ответ в FAQ
 4. Если не находит, то генерирует ответ при помощи LLM
 
-```
-Chat(
+```python
+class Chat(
     model,
     tokenizer,
     generation_config,
@@ -61,15 +74,11 @@ Chat(
     confidence_threshold: float = 0.9,
     device: str = "cuda",
 )
-
-generate - генерация ответа LLM
 ```
 
+`generate` - генерация ответа LLM
 
+## Ноутбуки
 
-
-Ноутбуки:
-
-distillation.ipynb - Код с дистилляцией модели ретривера
-
-retriever.ipynb - Полный пайплайн RAG в Ноутбуке
+- `distillation.ipynb` - Код с дистилляцией модели ретривера
+- `retriever.ipynb` - Полный пайплайн RAG в Ноутбуке

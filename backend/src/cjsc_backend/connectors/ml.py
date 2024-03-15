@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 import requests
-from loguru import logger
-from cjsc_backend.routers.http.schemas.message import \
-    Message, MessageRequest, MessageRequestConfig
 from cjsc_backend import config
+from cjsc_backend.routers.http.schemas.message import (
+    Message,
+    MessageRequest,
+    MessageRequestConfig,
+)
+from loguru import logger
 
 
 def query(message: Message) -> None:
@@ -28,4 +31,3 @@ def query(message: Message) -> None:
     )
 
     logger.debug(f"Sent message to ML Query: {r.status_code=} {r.json()=}")
-

@@ -1,10 +1,11 @@
 import json
 
+import pandas as pd
 from clickhouse_driver import Client
 
 
 class ClickHouse:
-    def __init__(self, client):
+    def __init__(self, client: Client):
         self.client = client
 
     def preprocess_faq_df(self, faq_df, embeddings):
@@ -83,7 +84,7 @@ class ClickHouse:
             )
         elif table == "documents":
             insert_info = self.preprocess_documents_df(df, embeddings)
-            client.execute(
+            self.client.execute(
                 "INSERT INTO documents (id, text, topic, title, url, date, embedding) VALUES",
                 insert_info,
             )

@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-from psycopg2 import DatabaseError
 from datetime import datetime
-from fastapi import APIRouter, Security, HTTPException
-from fastapi_jwt import JwtAuthorizationCredentials
-from loguru import logger
-from cjsc_backend import config
+
 from cjsc_backend.database.connect import create_connection_with_config
-from cjsc_backend.routers.http.schemas.token import TokenSchema
-from cjsc_backend.routers.http.schemas.user import UserBaseSchema, \
-    UserLoginSchema, UserInfoSchema
-from cjsc_backend.database.tables import users as db_users
 from cjsc_backend.database.tables import messages as db_msgs
+from fastapi import APIRouter
+from loguru import logger
+from psycopg2 import DatabaseError
 
 # See https://fastapi.tiangolo.com/tutorial/bigger-applications/
 
@@ -18,9 +13,11 @@ db = create_connection_with_config()
 
 router = APIRouter(
     prefix="/debug",
-    tags=['Debug', ],
+    tags=[
+        "Debug",
+    ],
     # dependencies=[Depends(get_token_header)],
-    responses={404: {"description": "Not found"}}
+    responses={404: {"description": "Not found"}},
 )
 
 

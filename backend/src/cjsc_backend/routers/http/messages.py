@@ -1,20 +1,23 @@
 #!/usr/bin/env python3
-from fastapi import APIRouter, Security, HTTPException
-from fastapi_jwt import JwtAuthorizationCredentials
-from loguru import logger
 from datetime import datetime
-from psycopg2 import DatabaseError
+
 from cjsc_backend import config
+from cjsc_backend.database.connect import create_connection_with_config
+from cjsc_backend.database.tables import chat_sessions as db_chat_sessions
 from cjsc_backend.database.tables import messages as db_msgs
 from cjsc_backend.database.tables import users as db_users
-from cjsc_backend.database.tables import chat_sessions as db_chat_sessions
-from cjsc_backend.database.connect import create_connection_with_config
-from cjsc_backend.routers.http.schemas.token import TokenSchema
+from cjsc_backend.routers.http.schemas.message import Message
+
 # from cjsc_backend.routers.http.schemas.user import UserBaseSchema, \
 #     UserLoginSchema, UserInfoSchema, UserSignupSchema
-from cjsc_backend.routers.http.schemas.user import UserChatEntriesSchema, \
-    UserChatEntrySchema
-from cjsc_backend.routers.http.schemas.message import Message
+from cjsc_backend.routers.http.schemas.user import (
+    UserChatEntriesSchema,
+    UserChatEntrySchema,
+)
+from fastapi import APIRouter, HTTPException, Security
+from fastapi_jwt import JwtAuthorizationCredentials
+from loguru import logger
+from psycopg2 import DatabaseError
 
 # See https://fastapi.tiangolo.com/tutorial/bigger-applications/
 
@@ -22,9 +25,11 @@ db = create_connection_with_config()
 
 router = APIRouter(
     prefix="/msg",
-    tags=['Messages', ],
+    tags=[
+        "Messages",
+    ],
     # dependencies=[Depends(get_token_header)],
-    responses={404: {"description": "Not found"}}
+    responses={404: {"description": "Not found"}},
 )
 
 
@@ -36,9 +41,7 @@ async def messages_get_chats(
         config.jwt_ac,
     ),
 ) -> UserChatEntriesSchema:
-    logger.debug(
-        f"Getting chats for user {credentials["id"]}"
-    )
+    logger.debug(f"Getting chats for user {credentials["id"]}")
 
     my_user = db_users.get(db, uid=credentials["id"])
 
@@ -80,7 +83,9 @@ async def messages_get_chats(
             avatar_url=user_info.avatar_url,
             unread_count=db_msgs.get_unread_count(db, chat, my_user.id),
             last_message_content=latest_message.content,
-            last_message_created_at=datetime.strftime(latest_message.created_at, "%Y-%m-%d %H:%M:%S"),
+            last_message_created_at=datetime.strftime(
+                latest_message.created_at, "%Y-%m-%d %H:%M:%S"
+            ),
             chat_session_expired=is_session_expired,
             ml_allowed=session.allow_ml if session is not None else None,
         )
@@ -88,7 +93,7 @@ async def messages_get_chats(
     return {
         "chats": chats,
         "users": users,
-        "is_operator": db_users.is_operator(db, credentials["id"])
+        "is_operator": db_users.is_operator(db, credentials["id"]),
     }
 
 
@@ -115,7 +120,9 @@ async def messages_send(ca_secret: str, msg: Message):
         )
 
     if msg.from_user_id != 0:
-        logger.warning(f"Received message with incorrect from_user_id: {msg.from_user_id}")
+        logger.warning(
+            f"Received message with incorrect from_user_id: {msg.from_user_id}"
+        )
         raise HTTPException(
             status_code=400,
             detail="from_user_id must be 0",

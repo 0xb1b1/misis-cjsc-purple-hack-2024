@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 import asyncio
-import socketio
-from socketio.exceptions import TimeoutError
 from datetime import datetime
-from psycopg2 import DatabaseError
-from jose import jwt
-from jose.jwt import JWTClaimsError, JWTError, ExpiredSignatureError
-from fastapi import APIRouter
-from loguru import logger
+
+import socketio
 from cjsc_backend import config
-from cjsc_backend.database.tables import messages
-from cjsc_backend.database.tables import chat_sessions
-from cjsc_backend.database.connect import create_connection_with_config
-from cjsc_backend.routers.http.schemas.message import Message
 from cjsc_backend.connectors import ml
+from cjsc_backend.database.connect import create_connection_with_config
+from cjsc_backend.database.tables import chat_sessions, messages
+from cjsc_backend.routers.http.schemas.message import Message
+from fastapi import APIRouter
+from jose import jwt
+from jose.jwt import ExpiredSignatureError, JWTError
+from loguru import logger
+from psycopg2 import DatabaseError
+from socketio.exceptions import TimeoutError
 
 router = APIRouter(
     tags=["Websockets"],
@@ -46,17 +46,16 @@ async def auth(sid, token):
         "auth",
         data={
             "status": "ok",
-            "user": {
-                "id": user["subject"]["id"],
-                "email": user["subject"]["email"]
-            }
+            "user": {"id": user["subject"]["id"], "email": user["subject"]["email"]},
         },
         room=sid,
-        namespace="/webapp"
+        namespace="/webapp",
     )
     logger.debug(f"Saving session for {sid}")
     await sio.save_session(sid, {"user": user}, namespace="/webapp")
-    logger.debug(f"Saved session for {sid}: {await sio.get_session(sid, namespace='/webapp')}")
+    logger.debug(
+        f"Saved session for {sid}: {await sio.get_session(sid, namespace='/webapp')}"
+    )
 
 
 @sio.on(event="chats_list", namespace="/webapp")
@@ -87,23 +86,13 @@ async def chats_list(sid):
         logger.error(f"Failed to get user chats: {e}")
         await sio.emit(
             "chats_list",
-            data={
-                "error": "Failed to get user chats",
-                "info: ": str(e)
-            },
+            data={"error": "Failed to get user chats", "info: ": str(e)},
             room=sid,
-            namespace="/webapp"
+            namespace="/webapp",
         )
         return
 
-    await sio.emit(
-        "chats_list",
-        data={
-            "chats": chats
-        },
-        room=sid,
-        namespace="/webapp"
-    )
+    await sio.emit("chats_list", data={"chats": chats}, room=sid, namespace="/webapp")
 
 
 @sio.on(event="chat_listen", namespace="/webapp")
@@ -148,20 +137,20 @@ async def chat_listen(sid, user_id):
                     data="heartbeat",
                     to=sid,
                     namespace="/webapp",
-                    timeout=5
+                    timeout=5,
                 )
                 heartbeat_counter = 1
             heartbeat_counter += 1
         except TimeoutError:
-            logger.error(f"Failed to send heartbeat to {sid}; client probably disconnected")
+            logger.error(
+                f"Failed to send heartbeat to {sid}; client probably disconnected"
+            )
             await sio.disconnect(sid, namespace="/webapp")
             return
 
         # Send messages
         try:
-            msgs = messages.get_chat_messages(
-                db, my_user_id, user_id, last_msg_id
-            )
+            msgs = messages.get_chat_messages(db, my_user_id, user_id, last_msg_id)
             last_msg_id = msgs[-1].id + 1 if len(msgs) > 0 else last_msg_id
             for msg in msgs:
                 await sio.call(
@@ -172,24 +161,23 @@ async def chat_listen(sid, user_id):
                             "from": msg.from_user_id,
                             "to": msg.to_user_id,
                             "content": msg.content,
-                            "created_at": datetime.strftime(msg.created_at, "%Y-%m-%d %H:%M:%S")
+                            "created_at": datetime.strftime(
+                                msg.created_at, "%Y-%m-%d %H:%M:%S"
+                            ),
                         }
                     },
                     to=sid,
                     namespace="/webapp",
-                    timeout=5
+                    timeout=5,
                 )
         except DatabaseError as e:
             logger.error(f"Failed to get chat messages (database): {e}")
             # disconnect client on exception (and send error message)
             await sio.emit(
                 "chat_message",
-                data={
-                    "error": "Failed to get chat messages",
-                    "info: ": str(e)
-                },
+                data={"error": "Failed to get chat messages", "info: ": str(e)},
                 room=sid,
-                namespace="/webapp"
+                namespace="/webapp",
             )
             await sio.disconnect(sid, namespace="/webapp")
             return
@@ -236,7 +224,9 @@ async def chats_listen(sid):
             logger.debug(f"Getting chat messages for {my_user_id} from {last_msg_id}")
             msgs = messages.get_all_chat_messages(db, my_user_id, last_msg_id)
             for msg in msgs:
-                logger.debug(f"Sending message to {sid}: {msg.content} from {msg.from_user_id} to {msg.to_user_id} at {msg.created_at}")
+                logger.debug(
+                    f"Sending message to {sid}: {msg.content} from {msg.from_user_id} to {msg.to_user_id} at {msg.created_at}"
+                )
                 await sio.emit(  # TODO: change back after testing
                     "chat_message",
                     data={
@@ -245,7 +235,9 @@ async def chats_listen(sid):
                             "from": msg.from_user_id,
                             "to": msg.to_user_id,
                             "content": msg.content,
-                            "created_at": datetime.strftime(msg.created_at, "%Y-%m-%d %H:%M:%S")
+                            "created_at": datetime.strftime(
+                                msg.created_at, "%Y-%m-%d %H:%M:%S"
+                            ),
                         }
                     },
                     to=sid,
@@ -264,18 +256,17 @@ async def chats_listen(sid):
             # disconnect client on exception (and send error message)
             await sio.emit(
                 "chat_message",
-                data={
-                    "error": "Failed to get chat messages",
-                    "info: ": str(e)
-                },
+                data={"error": "Failed to get chat messages", "info: ": str(e)},
                 room=sid,
-                namespace="/webapp"
+                namespace="/webapp",
             )
             await sio.disconnect(sid, namespace="/webapp")
             return
 
         except TimeoutError:
-            logger.error(f"Failed to send chat messages to {sid}; client probably disconnected")
+            logger.error(
+                f"Failed to send chat messages to {sid}; client probably disconnected"
+            )
             await sio.disconnect(sid, namespace="/webapp")
             return
         # IMPORTANT: Do not spam TODO: check the sleep duration performance
@@ -297,7 +288,9 @@ async def chat_send(sid, message):
     my_user_id = my_user["user"]["subject"]["id"]
 
     if "message" not in message:
-        logger.debug(f"Received chat message from {sid} without message: {message}; skipping.")
+        logger.debug(
+            f"Received chat message from {sid} without message: {message}; skipping."
+        )
         return
 
     logger.debug(f"Received chat message from {sid}: {message['message']}")
@@ -306,46 +299,44 @@ async def chat_send(sid, message):
         from_user_id=my_user_id,
         to_user_id=msg_raw["to"],
         content=msg_raw["content"],
-        created_at=datetime.now()
+        created_at=datetime.now(),
     )
     if msg.from_user_id != my_user_id:
         logger.warn(f"Received message from wrong user: {msg}")
         await sio.emit(
             "chat_message",
-            data={
-                "error": "Received message from wrong user",
-                "info: ": str(msg)
-            },
+            data={"error": "Received message from wrong user", "info: ": str(msg)},
             room=sid,
-            namespace="/webapp"
+            namespace="/webapp",
         )
         return
     try:
-        messages.create_chat_message(
-            db, msg
-        )
+        messages.create_chat_message(db, msg)
     except DatabaseError as e:
         logger.error(f"Failed to save chat message: {e}")
         await sio.emit(
             "chat_message",
-            data={
-                "error": "Failed to save chat message",
-                "info: ": str(e)
-            },
+            data={"error": "Failed to save chat message", "info: ": str(e)},
             room=sid,
-            namespace="/webapp"
+            namespace="/webapp",
         )
         return
 
     # Check if user wishes to talk to a live person; if so, turn off ML
     msg_lcontent = msg.content.lower()
-    if "оператор" in msg_lcontent or ("человек" in msg_lcontent and len(msg_lcontent) < 12):
-        logger.debug(f"User {my_user_id} wants to talk to a live person. Turning off ML for this session.")
+    if "оператор" in msg_lcontent or (
+        "человек" in msg_lcontent and len(msg_lcontent) < 12
+    ):
+        logger.debug(
+            f"User {my_user_id} wants to talk to a live person. Turning off ML for this session."
+        )
         chat_sessions.set_allow_ml(db, my_user_id, msg.to_user_id, False)
 
     session = chat_sessions.get_latest_chat_session(db, my_user_id, msg.to_user_id)
     if session is None:
-        logger.warning(f"Chat session not found for users {my_user_id} and {msg.to_user_id}. Creating a new one.")
+        logger.warning(
+            f"Chat session not found for users {my_user_id} and {msg.to_user_id}. Creating a new one."
+        )
         chat_sessions.create_chat_session(db, my_user_id, msg.to_user_id)
         session = chat_sessions.get_latest_chat_session(db, my_user_id, msg.to_user_id)
 
