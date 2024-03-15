@@ -4,13 +4,11 @@ WORKDIR /app
 
 COPY . /app
 
-RUN npm install -g pnpm --global-dir=/usr/local/lib/pnpm
-
-RUN pnpm install
-
-RUN pnpm run build
-
-RUN npm add serve -g
+# hadolint ignore=DL3016
+RUN npm install -g pnpm --global-dir=/usr/local/lib/pnpm && \
+    pnpm install && \
+    pnpm run build && \
+    npm add serve -g
 
 EXPOSE 3000
 
