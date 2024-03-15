@@ -33,7 +33,7 @@ export const MessageCard: FC<{ item: GroupedMessages }> = observer((x) => {
               borderBottomRightRadius: isAuthor && x.item.messages.length - 1 !== index ? 0 : "12px"
             }}
             className={cn(
-              "py-2 px-4",
+              "py-2 px-4 break-words",
               isAuthor ? "bg-primary text-white" : "bg-white",
               x.item.messages.length === 1 && "!rounded-xl"
             )}>
