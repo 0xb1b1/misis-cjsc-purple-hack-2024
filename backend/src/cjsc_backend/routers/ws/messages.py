@@ -10,8 +10,10 @@ from fastapi import APIRouter
 from loguru import logger
 from cjsc_backend import config
 from cjsc_backend.database.tables import messages
+from cjsc_backend.database.tables import chat_sessions
 from cjsc_backend.database.connect import create_connection_with_config
 from cjsc_backend.routers.http.schemas.message import Message
+from cjsc_backend.connectors import ml
 
 router = APIRouter(
     tags=["Websockets"],
@@ -291,6 +293,7 @@ async def chat_send(sid, message):
     # Receive messages from SIO client
     logger.debug(f"Received chat message from {sid}: {message}")
     my_user = await sio.get_session(sid, namespace="/webapp")
+    await asyncio.sleep(0.5)
     my_user_id = my_user["user"]["subject"]["id"]
 
     if "message" not in message:
@@ -333,6 +336,22 @@ async def chat_send(sid, message):
             namespace="/webapp"
         )
         return
+
+    # Check if user wishes to talk to a live person; if so, turn off ML
+    msg_lcontent = msg.content.lower()
+    if "оператор" in msg_lcontent or ("человек" in msg_lcontent and len(msg_lcontent) < 12):
+        logger.debug(f"User {my_user_id} wants to talk to a live person. Turning off ML for this session.")
+        chat_sessions.set_allow_ml(db, my_user_id, msg.to_user_id, False)
+
+    session = chat_sessions.get_latest_chat_session(db, my_user_id, msg.to_user_id)
+    if session is None:
+        logger.warning(f"Chat session not found for users {my_user_id} and {msg.to_user_id}. Creating a new one.")
+        chat_sessions.create_chat_session(db, my_user_id, msg.to_user_id)
+        session = chat_sessions.get_latest_chat_session(db, my_user_id, msg.to_user_id)
+
+    if session.allow_ml:
+        logger.debug(f"ML is allowed for this session. Querying ML for message: {msg}")
+        ml.query(msg)
 
 
 @sio.on("disconnect")

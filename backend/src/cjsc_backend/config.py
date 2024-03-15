@@ -72,6 +72,12 @@ if CROSS_APP_SECRET == "":
     logger.critical("Cross-app secret is not specified.")
     is_run_fatal = True
 
+# ML
+ML_URL = os.getenv("CJSC_BACKEND_ML_URL", "")
+if ML_URL == "":
+    logger.critical("ML URL is not specified.")
+    is_run_fatal = True
+
 ########
 if is_run_fatal:
     logger.critical("Setup failed. Exiting.")
