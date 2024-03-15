@@ -15,7 +15,9 @@ export const Chat = observer(() => {
   }, [ChatVm.messages]);
   return (
     <section className="w-full flex flex-col overflow-hidden lg:border-x lg:border-x-[#E4E4E4]">
-      <div ref={chatRef} className="flex flex-col-reverse w-full flex-1 overflow-y-auto px-2 pt-8">
+      <div
+        ref={chatRef}
+        className="flex flex-col-reverse w-full flex-1 overflow-y-auto overflow-x-hidden px-2 pt-8">
         {ChatVm.messages ? (
           <div className="flex flex-col gap-6">
             {ChatVm.messages.map((item, index) => (
