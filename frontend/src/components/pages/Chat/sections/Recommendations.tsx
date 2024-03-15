@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { MobileRecommendations } from "./MobileRecommendations";
 
 export const Recommendations = observer(() => {
-  const [docsHidden, setDocsHidden] = useState(false);
+  const [docsHidden, setDocsHidden] = useState(true);
 
   return (
     <>
