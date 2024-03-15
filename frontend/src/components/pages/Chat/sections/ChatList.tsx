@@ -6,7 +6,7 @@ import { useState } from "react";
 import ChevronIcon from "@/assets/icons/Chevron.svg";
 
 export const ChatList = observer(() => {
-  const [hidden, setHidden] = useState(true);
+  const [hidden, setHidden] = useState(false);
 
   if (!ChatVm.isOperator) return null;
 

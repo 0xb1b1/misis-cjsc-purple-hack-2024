@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import { getStoredAuthToken, removeStoredAuthToken } from "./authToken";
 
-axios.defaults.baseURL = "http://127.0.0.1:8080/";
+axios.defaults.baseURL = "https://cjsc-backend.seizure.icu/";
 
 const get = <T>(path: string, config?: AxiosRequestConfig<unknown>): Promise<T> =>
   new Promise((resolve, reject) => {
